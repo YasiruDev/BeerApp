@@ -1,15 +1,27 @@
 .list {
-  list-style: none;
+    list-style: none;
 }
 
 .listContainer {
-  padding: 20px;
-  margin-bottom: 20px;
-  background: #fff;
+    padding: 20px;
+    margin-bottom: 20px;
+    background: #fff;
 }
 
 .listHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sliderContainer {
+    height: 100vh;
+}
+.sliderBox {
+    padding: 20px;
+    min-height: 90vh;
+    margin: 2px;
+}
+.sliderElement {
+    margin-bottom: 20px !important;
 }

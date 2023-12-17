@@ -1,65 +1,62 @@
-import { useEffect, useState } from 'react';
-import { fetchData } from './utils';
-import { Beer } from '../../types';
-import { Link as RouterLink } from 'react-router-dom';
-import { Button, Checkbox, Paper, TextField, Link } from '@mui/material';
-import styles from './Home.module.css';
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { fetchData } from './utils'
+import { ApiParams, Beer } from '../../types'
+import { Button, Paper, TextField, Link, Grid, Typography } from '@mui/material'
+import styles from './Home.module.css'
+import FavoriteList from './FavoriteList'
+import AboutUs from './AboutUs'
+import Search from '../../components/Search'
+import { SEARCH_BOX } from './const'
 
 const Home = () => {
-  const [beerList, setBeerList] = useState<Array<Beer>>([]);
-  const [savedList, setSavedList] = useState<Array<Beer>>([]);
+    const navigate = useNavigate()
+    const [beerList, setBeerList] = useState<Array<Beer>>([])
+    const [params, setParams] = useState<ApiParams | null>(null)
 
-  // eslint-disable-next-line
-  useEffect(fetchData.bind(this, setBeerList), []);
+    // eslint-disable-next-line
 
-  return (
-    <article>
-      <section>
-        <main>
-          <Paper>
-            <div className={styles.listContainer}>
-              <div className={styles.listHeader}>
-                <TextField label='Filter...' variant='outlined' />
-                <Button variant='contained'>Reload list</Button>
-              </div>
-              <ul className={styles.list}>
-                {beerList.map((beer, index) => (
-                  <li key={index.toString()}>
-                    <Checkbox />
-                    <Link component={RouterLink} to={`/beer/${beer.id}`}>
-                      {beer.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </Paper>
+    useEffect(() => {
+        if (params?.by_name) {
+            const getData = setTimeout(() => {
+                fetchData(setBeerList, params as ApiParams)
+            }, 1000)
+            return () => clearTimeout(getData)
+        }
+    }, [params])
 
-          <Paper>
-            <div className={styles.listContainer}>
-              <div className={styles.listHeader}>
-                <h3>Saved items</h3>
-                <Button variant='contained' size='small'>
-                  Remove all items
-                </Button>
-              </div>
-              <ul className={styles.list}>
-                {savedList.map((beer, index) => (
-                  <li key={index.toString()}>
-                    <Checkbox />
-                    <Link component={RouterLink} to={`/beer/${beer.id}`}>
-                      {beer.name}
-                    </Link>
-                  </li>
-                ))}
-                {!savedList.length && <p>No saved items</p>}
-              </ul>
-            </div>
-          </Paper>
-        </main>
-      </section>
-    </article>
-  );
-};
+    const handleOnclick = (value: string) => {
+        navigate(`/beer/${value}`)
+    }
 
-export default Home;
+    return (
+        <Grid
+            container
+            justifyContent="center"
+            alignItems="center"
+            className={styles.sliderContainer}
+            spacing={3}
+        >
+            <Grid item xs={12} md={6}>
+                <Paper elevation={3} className={styles.sliderBox}>
+                    <Search
+                        title={SEARCH_BOX.TITLE}
+                        data={beerList.map(({ id, name }) => ({
+                            id,
+                            label: name,
+                        }))}
+                        searchData={setParams}
+                        handleOnclick={handleOnclick}
+                    />
+                    <AboutUs />
+                </Paper>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+                <FavoriteList />
+            </Grid>
+        </Grid>
+    )
+}
+
+export default Home
