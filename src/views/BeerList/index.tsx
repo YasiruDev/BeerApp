@@ -1,42 +1,70 @@
-import { useEffect, useState } from 'react';
-import { Beer } from '../../types';
-import { fetchData } from './utils';
-import { Avatar, List, ListItemAvatar, ListItemButton, ListItemText } from '@mui/material';
-import SportsBar from '@mui/icons-material/SportsBar';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react'
+import { ApiParams, Beer } from '../../types'
+import { fetchData, fetchMetaData } from './utils'
+import { useNavigate } from 'react-router-dom'
+import BeerTable from './BeerTable'
+import Progress from '../../components/Progress'
 
 const BeerList = () => {
-  const navigate = useNavigate();
-  const [beerList, setBeerList] = useState<Array<Beer>>([]);
+    const navigate = useNavigate()
+    const [total, setTotal] = useState<number>(0)
+    const [beerList, setBeerList] = useState<Array<Beer>>([])
+    const [params, setParams] = useState<ApiParams>({ page: 0, per_page: 10 })
 
-  // eslint-disable-next-line
-  useEffect(fetchData.bind(this, setBeerList), []);
+    // eslint-disable-next-line
 
-  const onBeerClick = (id: string) => navigate(`/beer/${id}`);
+    useEffect(() => {
+        fetchData(setBeerList, {
+            ...params,
+        })
+        fetchMetaData(setTotal, {
+            ...params,
+        })
+    }, [params])
+    const onBeerClick = (id: string) => navigate(`/beer/${id}`)
 
-  return (
-    <article>
-      <section>
-        <header>
-          <h1>BeerList page</h1>
-        </header>
-        <main>
-          <List>
-            {beerList.map((beer) => (
-              <ListItemButton key={beer.id} onClick={onBeerClick.bind(this, beer.id)}>
-                <ListItemAvatar>
-                  <Avatar>
-                    <SportsBar />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={beer.name} secondary={beer.brewery_type} />
-              </ListItemButton>
-            ))}
-          </List>
-        </main>
-      </section>
-    </article>
-  );
-};
+    const setSearchBy = (param: keyof ApiParams, value: string) => {
+        setParams({ ...params, [param]: value })
+    }
 
-export default BeerList;
+    const setPage = (page: number) => {
+        setParams({
+            ...params,
+            page,
+        })
+    }
+
+    const setRowsPerPage = (perPage: number) => {
+        setParams({
+            ...params,
+            per_page: perPage,
+        })
+    }
+
+    return (
+        <article>
+            <section>
+                <header>
+                    <h1>BeerList page</h1>
+                </header>
+                <main>
+                    {beerList && beerList?.length ? (
+                        <BeerTable
+                            list={beerList}
+                            setSearchBy={setSearchBy}
+                            total={total}
+                            page={params.page as number}
+                            rowsPerPage={params.per_page as number}
+                            setPage={setPage}
+                            setRowsPerPage={setRowsPerPage}
+                        />
+                    ) : (
+                        <Progress />
+                    )}
+                </main>
+            </section>
+        </article>
+    )
+}
+
+export default BeerList
